@@ -6,17 +6,16 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
-    strictPort: true,
     host: false,
     proxy: {
       '/api': {
-        target: 'http://localhost:4000',
+        target: 'https://job-portal-4haa.onrender.com',
         changeOrigin: true,
         secure: false,
       }
     }
   },
   define: {
-    'import.meta.env.VITE_API_BASE_URL': JSON.stringify('http://localhost:4000/api/v1')
+    'import.meta.env.VITE_API_BASE_URL': JSON.stringify('https://job-portal-4haa.onrender.com/api/v1')
   }
 })

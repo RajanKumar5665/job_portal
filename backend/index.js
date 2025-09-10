@@ -23,7 +23,7 @@ app.use(cookieParser());
 
 const corsOptions = {
     origin: [
-        process.env.FRONTEND_URL || 'http://localhost:5173',
+        process.env.FRONTEND_URL || 'https://job-portal-4haa.onrender.com',
     ],
     credentials: true
 };
