@@ -164,21 +164,13 @@ export const updateUserProfile = async (req, res) => {
 
         // handle resume file upload if provided
         if (req.file) {
-            try {
-                const fileUri = getDataUri(req.file);
-                const uploadResult = await cloudinary.uploader.upload(fileUri.content, {
-                    resource_type: 'raw',
-                    folder: 'resumes'
-                });
-                user.profile.resume = uploadResult.secure_url;
-                user.profile.resumeOriginalName = req.file.originalname;
-            } catch (uploadError) {
-                console.error('File upload error:', uploadError);
-                return res.status(500).json({ 
-                    message: 'Failed to upload resume file', 
-                    success: false 
-                });
-            }
+            const fileUri = getDataUri(req.file);
+            const uploadResult = await cloudinary.uploader.upload(fileUri.content, {
+                resource_type: 'raw',
+                folder: 'resumes'
+            });
+            user.profile.resume = uploadResult.secure_url;
+            user.profile.resumeOriginalName = req.file.originalname;
         }
 
         await user.save();
