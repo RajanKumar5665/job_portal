@@ -1,6 +1,8 @@
 import { User } from '../models/user.model.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import cloudinary from '../utils/cloudinary.js';
+import getDataUri from '../utils/datauri.js';
 
 
 //register user
@@ -76,11 +78,13 @@ export const loginUser = async (req, res) => {
             profile: user.profile
         }
 
+        const isProduction = process.env.NODE_ENV === 'production';
         return res.status(200).cookie(
             "token", token,
-            {maxAge: 24 * 60 * 60 * 1000, // 1 day
+            {maxAge: 24 * 60 * 60 * 1000,
             httpOnly: true,
-            sameSite:'strict',}
+            sameSite: isProduction ? 'none' : 'lax',
+            secure: isProduction}
         ).json({
             message: `Welcome back, ${user.name}`,
             success: true,
@@ -127,6 +131,17 @@ export const updateUserProfile = async (req, res) => {
         if(phoneNumber) user.phoneNumber = phoneNumber;
         if(bio) user.profile.bio = bio;
         if(skills) user.profile.skills = skillsArray;
+
+        // handle resume file upload if provided
+        if (req.file) {
+            const fileUri = getDataUri(req.file);
+            const uploadResult = await cloudinary.uploader.upload(fileUri.content, {
+                resource_type: 'raw',
+                folder: 'resumes'
+            });
+            user.profile.resume = uploadResult.secure_url;
+            user.profile.resumeOriginalName = req.file.originalname;
+        }
 
         await user.save();
 
