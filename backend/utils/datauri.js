@@ -8,6 +8,6 @@ const getDataUri = (file) => {
     return parser.format(extName, file.buffer);
 }
 
-// Export both default and named to be compatible with various import styles
+
 export { getDataUri };
 export default getDataUri;
