@@ -66,7 +66,9 @@ const JobDetail = () => {
         queryClient.invalidateQueries(['job', id]);
       },
       onError: (error) => {
-        toast.error(error.response?.data?.message || 'Failed to update status');
+        if (error.response?.status !== 401) {
+          toast.error(error.response?.data?.message || 'Failed to update status');
+        }
       },
     }
   );
