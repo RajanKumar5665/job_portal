@@ -81,9 +81,14 @@ export const getCompanyById = async (req, res) => {
 export const updateCompany = async (req, res) => {
     try {
         const { name, description, location, website } = req.body;
-        const file = req.file; // logo file
 
-        //cloudinary part comes later here
+        // Validate required fields
+        if (!name && !description && !location && !website) {
+            return res.status(400).json({ 
+                message: 'At least one field must be provided for update', 
+                success: false 
+            });
+        }
 
         const updateData = {};
         if (name) updateData.name = name;
@@ -101,12 +106,13 @@ export const updateCompany = async (req, res) => {
         }
            return res.status(200).json({
             message:"Company information updated.",
-            success:true
+            success:true,
+            company
         })
     }
     catch (error) {
         console.error('Error in updateCompany:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Server error', success: false });
     }
 };
 

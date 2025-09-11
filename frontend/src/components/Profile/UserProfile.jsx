@@ -34,9 +34,15 @@ const UserProfile = () => {
       return await updateProfile(profileData);
     },
     {
-      onSuccess: () => {
-        queryClient.invalidateQueries('user');
-        setIsEditing(false);
+      onSuccess: (data) => {
+        if (data.success) {
+          queryClient.invalidateQueries('user');
+          setIsEditing(false);
+          toast.success('Profile updated successfully!');
+        }
+      },
+      onError: (error) => {
+        toast.error(error.message || 'Failed to update profile');
       },
     }
   );

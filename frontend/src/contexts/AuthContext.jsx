@@ -98,7 +98,7 @@ export const AuthProvider = ({ children }) => {
       });
 
       const response = await axios.post(
-        `${API_BASE_URL}/user/me`,
+        `${API_BASE_URL}/user/profile/update`,
         formData,
         {
           withCredentials: true,

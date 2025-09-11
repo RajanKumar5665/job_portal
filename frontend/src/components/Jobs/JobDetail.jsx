@@ -136,7 +136,12 @@ const JobDetail = () => {
   }
 
   const isJobCreator = user?.role === 'recruiter' && job.created_by === user._id;
-  const hasApplied = job.applications?.some(app => app.applicant === user?._id);
+  const hasApplied = Array.isArray(job.applications)
+    ? job.applications.some(app => {
+        const applicantId = typeof app.applicant === 'string' ? app.applicant : app.applicant?._id;
+        return applicantId === user?._id;
+      })
+    : false;
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -273,17 +278,45 @@ const JobDetail = () => {
                       key={application._id}
                       className="border border-gray-200 rounded-lg p-4"
                     >
-                      <div className="flex items-center justify-between">
-                        <div>
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-1">
                           <h3 className="font-medium text-gray-900">
                             {application.applicant?.name}
                           </h3>
                           <p className="text-sm text-gray-600">
                             {application.applicant?.email}
                           </p>
+                          {application.applicant?.phoneNumber && (
+                            <p className="text-sm text-gray-600">
+                              {application.applicant.phoneNumber}
+                            </p>
+                          )}
                           <p className="text-sm text-gray-600">
                             Applied {formatDistanceToNow(new Date(application.createdAt), { addSuffix: true })}
                           </p>
+
+                          {application.applicant?.profile?.skills?.length > 0 && (
+                            <div className="flex flex-wrap gap-2 pt-2">
+                              {application.applicant.profile.skills.map((skill, idx) => (
+                                <span key={idx} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                  {skill}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+
+                          {application.applicant?.profile?.resume && (
+                            <div className="pt-2">
+                              <a
+                                href={application.applicant.profile.resume}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:text-blue-700 text-sm"
+                              >
+                                {application.applicant.profile.resumeOriginalName || 'View Resume'}
+                              </a>
+                            </div>
+                          )}
                         </div>
                         <div className="flex items-center space-x-3">
                           <span

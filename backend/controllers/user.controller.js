@@ -114,10 +114,17 @@ export const updateUserProfile = async (req, res) => {
     try {
         const {name, email, phoneNumber, bio, skills} = req.body;
 
+        // Validate required fields
+        if (!name && !email && !phoneNumber && !bio && !skills && !req.file) {
+            return res.status(400).json({ 
+                message: 'At least one field must be provided for update', 
+                success: false 
+            });
+        }
 
         let skillsArray;
         if(skills){
-            skillsArray = skills.split(',').map(skill => skill.trim());
+            skillsArray = skills.split(',').map(skill => skill.trim()).filter(skill => skill.length > 0);
         }
 
         const userId = req.id; // middleware authentication
@@ -125,6 +132,29 @@ export const updateUserProfile = async (req, res) => {
         if(!user){
             return res.status(404).json({ message: 'User not found', success: false });
         }
+
+        // Check for duplicate email if email is being updated
+        if(email && email !== user.email) {
+            const existingUser = await User.findOne({ email });
+            if(existingUser) {
+                return res.status(400).json({ 
+                    message: 'Email already exists', 
+                    success: false 
+                });
+            }
+        }
+
+        // Check for duplicate phone number if phone is being updated
+        if(phoneNumber && phoneNumber !== user.phoneNumber) {
+            const existingUser = await User.findOne({ phoneNumber });
+            if(existingUser) {
+                return res.status(400).json({ 
+                    message: 'Phone number already exists', 
+                    success: false 
+                });
+            }
+        }
+
         // updating data
         if(name) user.name = name;
         if(email) user.email = email;
@@ -134,13 +164,21 @@ export const updateUserProfile = async (req, res) => {
 
         // handle resume file upload if provided
         if (req.file) {
-            const fileUri = getDataUri(req.file);
-            const uploadResult = await cloudinary.uploader.upload(fileUri.content, {
-                resource_type: 'raw',
-                folder: 'resumes'
-            });
-            user.profile.resume = uploadResult.secure_url;
-            user.profile.resumeOriginalName = req.file.originalname;
+            try {
+                const fileUri = getDataUri(req.file);
+                const uploadResult = await cloudinary.uploader.upload(fileUri.content, {
+                    resource_type: 'raw',
+                    folder: 'resumes'
+                });
+                user.profile.resume = uploadResult.secure_url;
+                user.profile.resumeOriginalName = req.file.originalname;
+            } catch (uploadError) {
+                console.error('File upload error:', uploadError);
+                return res.status(500).json({ 
+                    message: 'Failed to upload resume file', 
+                    success: false 
+                });
+            }
         }
 
         await user.save();
@@ -161,7 +199,7 @@ export const updateUserProfile = async (req, res) => {
     }
         catch (error) {
             console.error('Error in updateUserProfile:', error);
-            res.status(500).json({ message: 'Server error' });
+            res.status(500).json({ message: 'Server error', success: false });
         }
 };
 
