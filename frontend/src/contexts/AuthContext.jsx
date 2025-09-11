@@ -109,7 +109,6 @@ export const AuthProvider = ({ children }) => {
       );
       
       setUser(response.data.user);
-      toast.success(response.data.message);
       return { success: true };
     } catch (error) {
       const message = error.response?.data?.message || 'Profile update failed';
