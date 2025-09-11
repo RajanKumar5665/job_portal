@@ -2,35 +2,38 @@ import { Job } from "../models/job.model.js";
 
 
 //admin post job
-export const createJob = async (req, res) => {
+export const postJob = async (req, res) => {
     try {
-        const { title, description, skills, salary,requirements,position, jobType, experienceLevel, location, companyId } = req.body;
-        if (!title || !description || !skills || !salary || !experienceLevel || !location) {
-            return res.status(400).json({ message: 'All fields are required', success: false });
-        }
-        const newJob = await Job.create({
+        const { title, description, requirements, salary, location, jobType, experience, position, companyId } = req.body;
+        const userId = req.id;
+
+        if (!title || !description || !requirements || !salary || !location || !jobType || !experience || !position || !companyId) {
+            return res.status(400).json({
+                message: "Somethin is missing.",
+                success: false
+            })
+        };
+        const job = await Job.create({
             title,
             description,
-            skills, 
-            salary: Number(salary),
             requirements: requirements.split(","),
-            jobType,
-            experienceLevel,
-            position: Number(position),
+            salary: Number(salary),
             location,
+            jobType,
+            experienceLevel: experience,
+            position,
             company: companyId,
-            created_by: req.id
+            created_by: userId
         });
-        res.status(201).json({
-            message: 'Job created successfully',
-            success: true,
-            newJob
+        return res.status(201).json({
+            message: "New job created successfully.",
+            job,
+            success: true
         });
     } catch (error) {
-        console.error('Error in createJob:', error);
-        res.status(500).json({ message: 'Server error', success: false });
+        console.log(error);
     }
-};
+}
 
 //user get all jobs
 export const getAllJobs = async (req, res) => {

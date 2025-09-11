@@ -9,7 +9,7 @@ router.post('/register', registerUser);
 router.post('/login', loginUser);
 router.get('/logout', logoutUser);
 router.get('/me', isAuthenticated, getUserProfile);
-router.post('/me', isAuthenticated, singleUpload, updateUserProfile);
+router.post('/profile/update', isAuthenticated, singleUpload, updateUserProfile);
 
 
 export default router;
