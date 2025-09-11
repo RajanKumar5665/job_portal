@@ -2,7 +2,7 @@ import { Job } from "../models/job.model.js";
 
 
 //admin post job
-export const postJob = async (req, res) => {
+export const createJob = async (req, res) => {
     try {
         const { title, description, requirements, salary, location, jobType, experience, position, companyId } = req.body;
         const userId = req.id;

@@ -10,8 +10,7 @@ import {
   Users, 
   FileText,
   Building2,
-  Loader2,
-  Zap 
+  Loader2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -20,7 +19,6 @@ const CreateJob = () => {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
     title: '',
-    skills: '',
     description: '',
     requirements: '',
     salary: '',
@@ -181,27 +179,6 @@ const CreateJob = () => {
             />
             <p className="text-sm text-gray-500 mt-1">
               Separate multiple requirements with commas
-            </p>
-          </div>
-          
-          {/* Skills - Added missing field */}
-          <div>
-            <label htmlFor="skills" className="block text-sm font-medium text-gray-700 mb-2">
-              <Zap className="h-4 w-4 inline mr-1" />
-              Required Skills *
-            </label>
-            <textarea
-              id="skills"
-              name="skills"
-              required
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="List required skills separated by commas (e.g., JavaScript, React, Node.js, MongoDB)"
-              value={formData.skills}
-              onChange={handleChange}
-            />
-            <p className="text-sm text-gray-500 mt-1">
-              Separate multiple skills with commas
             </p>
           </div>
 
