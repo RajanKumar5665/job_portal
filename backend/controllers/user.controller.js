@@ -9,9 +9,57 @@ import getDataUri from '../utils/datauri.js';
 export const registerUser = async (req, res) => {
     try {
         const { name, email, phoneNumber, password, role } = req.body;
+        
+        // Validate all fields are present
         if (!name || !email || !phoneNumber || !password || !role) {
-            return res.status(400).json({ message: 'All fields are required' });
+            return res.status(400).json({ 
+                message: 'All fields are required',
+                success: false 
+            });
         }
+
+        // Validate name length
+        if (name.length < 3 || name.length > 50) {
+            return res.status(400).json({ 
+                message: 'Name must be between 3 and 50 characters',
+                success: false 
+            });
+        }
+
+        // Validate email format
+        const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ 
+                message: 'Please provide a valid email address',
+                success: false 
+            });
+        }
+
+        // Validate phone number format
+        const phoneRegex = /^\d{10}$/;
+        if (!phoneRegex.test(phoneNumber)) {
+            return res.status(400).json({ 
+                message: 'Please provide a valid 10-digit phone number',
+                success: false 
+            });
+        }
+
+        // Validate password strength
+        if (password.length < 6) {
+            return res.status(400).json({ 
+                message: 'Password must be at least 6 characters long',
+                success: false 
+            });
+        }
+
+        // Validate role
+        if (!['student', 'recruiter'].includes(role)) {
+            return res.status(400).json({ 
+                message: 'Invalid role. Must be either student or recruiter',
+                success: false 
+            });
+        }
+
         const exitingUser = await User.findOne({ $or: [{ email }, { phoneNumber }] });
         if (exitingUser) {
             return res.status(400).json({ message: 'User with this email or phone number already exists' });

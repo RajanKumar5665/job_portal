@@ -9,19 +9,38 @@ export const createJob = async (req, res) => {
 
         if (!title || !description || !requirements || !salary || !location || !jobType || !experience || !position || !companyId) {
             return res.status(400).json({
-                message: "Somethin is missing.",
+                message: "Something is missing.",
                 success: false
             })
-        };
+        }
+
+        // Validate salary is a positive number
+        const salaryNum = Number(salary);
+        if (isNaN(salaryNum) || salaryNum <= 0) {
+            return res.status(400).json({
+                message: "Please provide a valid salary amount",
+                success: false
+            })
+        }
+
+        // Validate position is a positive number
+        const positionNum = Number(position);
+        if (isNaN(positionNum) || positionNum <= 0) {
+            return res.status(400).json({
+                message: "Please provide a valid number of positions",
+                success: false
+            })
+        }
+
         const job = await Job.create({
             title,
             description,
             requirements: requirements.split(","),
-            salary: Number(salary),
+            salary: salaryNum,
             location,
             jobType,
             experienceLevel: experience,
-            position,
+            position: positionNum,
             company: companyId,
             created_by: userId
         });
@@ -32,6 +51,10 @@ export const createJob = async (req, res) => {
         });
     } catch (error) {
         console.log(error);
+        return res.status(500).json({
+            message: "Internal server error",
+            success: false
+        });
     }
 }
 
@@ -39,27 +62,54 @@ export const createJob = async (req, res) => {
 export const getAllJobs = async (req, res) => {
     try {
         const keyword = req.query.keyword || "";
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
         const query = {
             $or: [
                 { title: { $regex: keyword, $options: "i" } },
                 { description: { $regex: keyword, $options: "i" } },
             ]
         };
-        const jobs = await Job.find(query).populate({
-            path: "company"
-        }).sort({ createdAt: -1 });
-        if (!jobs) {
+
+        // Get total count for pagination
+        const totalJobs = await Job.countDocuments(query);
+        const totalPages = Math.ceil(totalJobs / limit);
+
+        const jobs = await Job.find(query)
+            .populate({
+                path: "company"
+            })
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        if (!jobs || jobs.length === 0) {
             return res.status(404).json({
                 message: "Jobs not found.",
                 success: false
             })
-        };
+        }
+
         return res.status(200).json({
             jobs,
+            pagination: {
+                currentPage: page,
+                totalPages: totalPages,
+                totalJobs: totalJobs,
+                jobsPerPage: limit,
+                hasNextPage: page < totalPages,
+                hasPrevPage: page > 1
+            },
             success: true
         })
     } catch (error) {
         console.log(error);
+        return res.status(500).json({
+            message: "Internal server error",
+            success: false
+        });
     }
 }
 

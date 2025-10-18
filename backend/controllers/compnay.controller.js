@@ -8,6 +8,22 @@ export const registerCompany = async (req, res) => {
                 success:false
             });
         }
+
+        // Validate company name length
+        if (CompanyName.trim().length < 2) {
+            return res.status(400).json({
+                message: 'Company name must be at least 2 characters',
+                success: false
+            });
+        }
+
+        if (CompanyName.length > 100) {
+            return res.status(400).json({
+                message: 'Company name must not exceed 100 characters',
+                success: false
+            });
+        }
+
         let company = await Company.findOne({name:CompanyName});
         if(company){
             return res.status(400).json({ 
@@ -75,6 +91,10 @@ export const getCompanyById = async (req, res) => {
         })
     } catch (error) {
         console.log(error);
+        return res.status(500).json({
+            message: "Internal server error",
+            success: false
+        });
     }
 }
 
@@ -88,6 +108,25 @@ export const updateCompany = async (req, res) => {
                 message: 'At least one field must be provided for update', 
                 success: false 
             });
+        }
+
+        // Validate name length if provided
+        if (name && name.trim().length < 2) {
+            return res.status(400).json({
+                message: 'Company name must be at least 2 characters',
+                success: false
+            });
+        }
+
+        // Validate website URL if provided
+        if (website) {
+            const urlRegex = /^(https?:\/\/)?([\w\d-]+\.)+[\w\d-]+(\/.*)?$/;
+            if (!urlRegex.test(website)) {
+                return res.status(400).json({
+                    message: 'Invalid website URL format',
+                    success: false
+                });
+            }
         }
 
         const updateData = {};

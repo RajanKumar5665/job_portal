@@ -108,40 +108,62 @@ export const getApplicants = async (req,res) => {
         };
         return res.status(200).json({
             jobs, 
-            succees:true
+            success:true
         });
     } catch (error) {
-        console.log(error);  
+        console.log(error);
+        return res.status(500).json({
+            message: "Internal server error",
+            success: false
+        });
     }
 }
 
 //status
 
 export const updateApplicationStatus = async (req, res) => {
-    const { status } = req.body;
-    const applicationId = req.params.id;
-    if(!status){
-        return res.status(400).json({
-            message: "Status is required.",
+    try {
+        const { status } = req.body;
+        const applicationId = req.params.id;
+        
+        if(!status){
+            return res.status(400).json({
+                message: "Status is required.",
+                success: false
+            });
+        }
+
+        // Validate status values
+        const validStatuses = ['pending', 'accepted', 'rejected'];
+        if (!validStatuses.includes(status.toLowerCase())) {
+            return res.status(400).json({
+                message: "Invalid status. Must be: pending, accepted, or rejected",
+                success: false
+            });
+        }
+
+        //find the application by applicant id
+        const application = await Application.findOne({ _id: applicationId });
+        if (!application) {
+            return res.status(404).json({
+                message: "Application not found.",
+                success: false
+            });
+        }
+        
+        //update application status
+        application.status = status.toLowerCase();
+        await application.save();
+
+        return res.status(200).json({
+            message: "Application status updated successfully.",
+            success: true
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            message: "Internal server error",
             success: false
         });
     }
-
-    //find the application by applicant id
-
-    const application = await Application.findOne({ _id: applicationId });
-    if (!application) {
-        return res.status(404).json({
-            message: "Application not found.",
-            success: false
-        });
-    }
-  //update application status
-    application.status = status.toLowerCase();
-    await application.save();
-
-    return res.status(200).json({
-        message: "Application status updated successfully.",
-        success: true
-    });
 }
