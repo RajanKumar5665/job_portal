@@ -16,20 +16,20 @@ const app = express();
 
 const __dirname = path.resolve();
 
-// Rate limiting middleware
+// Rate limiting middleware - Reasonable limits for production
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per windowMs
+    max: 200, // Limit each IP to 200 requests per 15 minutes
     message: "Too many requests from this IP, please try again later.",
     standardHeaders: true,
     legacyHeaders: false,
 });
 
-// Stricter rate limit for authentication routes
+// Auth rate limit - Allows normal login attempts while preventing brute force
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5, // Limit each IP to 5 login/register attempts per windowMs
-    message: "Too many authentication attempts, please try again later.",
+    max: 20, // 20 login/register attempts per 15 minutes (more than enough for normal use)
+    message: "Too many authentication attempts, please try again after 15 minutes.",
     standardHeaders: true,
     legacyHeaders: false,
 });
@@ -39,11 +39,27 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// CORS configuration for production and development
+const allowedOrigins = [
+    process.env.FRONTEND_URL || 'https://job-portal-4haa.onrender.com'
+];
+
 const corsOptions = {
-    origin: [
-        process.env.FRONTEND_URL || 'https://job-portal-4haa.onrender.com',
-    ],
-    credentials: true
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            console.log('Blocked by CORS:', origin);
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['set-cookie']
 };
 app.use(cors(corsOptions));
 
@@ -68,11 +84,9 @@ app.get("*",(_, res) => {
     res.sendFile(path.join(__dirname, 'frontend', 'dist', 'index.html'));
 });
 
-const PORT = process.env.PORT || 4000;    
+const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, () => {
     connectDB();
     console.log(`Server running at port ${PORT}`);
 });
-
-    
