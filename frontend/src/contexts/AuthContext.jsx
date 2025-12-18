@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://job-portal-a540.onrender.com/api/v1';
 
   useEffect(() => {
     checkAuthStatus();
@@ -108,7 +108,8 @@ export const AuthProvider = ({ children }) => {
       );
       
       setUser(response.data.user);
-      toast. { success: true };
+      toast.success(response.data.message);
+      return { success: true };
     } catch (error) {
       const message = error.response?.data?.message || 'Profile update failed';
       toast.error(message);
