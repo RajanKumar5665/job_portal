@@ -97,7 +97,7 @@ export const AuthProvider = ({ children }) => {
       });
 
       const response = await axios.post(
-        `${API_BASE_URL}/user/me`,
+        `${API_BASE_URL}/user/profile/update`,
         formData,
         {
           withCredentials: true,
@@ -108,7 +108,8 @@ export const AuthProvider = ({ children }) => {
       );
       
       setUser(response.data.user);
-      toast. { success: true };
+      toast.success(response.data.message || 'Profile updated successfully');
+      return { success: true };
     } catch (error) {
       const message = error.response?.data?.message || 'Profile update failed';
       toast.error(message);
