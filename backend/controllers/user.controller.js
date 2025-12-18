@@ -139,7 +139,7 @@ export const loginUser = async (req, res) => {
             profile: user.profile
         }
 
-        const isProduction = process.env.NODE_ENV === 'production';
+        const isProduction = process.env.NODE_ENV === 'production' || (process.env.FRONTEND_URL && process.env.FRONTEND_URL.includes('https'));
         return res.status(200).cookie(
             "token", token,
             {maxAge: 24 * 60 * 60 * 1000,
