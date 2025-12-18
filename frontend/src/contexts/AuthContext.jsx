@@ -62,10 +62,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/user/register`,
-        userData
-      );
+      const response = await api.post('/user/register', userData);
       
       toast.success(response.data.message);
       return { success: true };
