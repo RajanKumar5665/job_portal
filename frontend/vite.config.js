@@ -9,13 +9,10 @@ export default defineConfig({
     host: false,
     proxy: {
       '/api': {
-        target: 'https://job-portal-4haa.onrender.com',
+        target: 'https://job-portal-a540.onrender.com',
         changeOrigin: true,
         secure: false,
       }
     }
   },
-  define: {
-    'import.meta.env.VITE_API_BASE_URL': JSON.stringify('https://job-portal-4haa.onrender.com/api/v1')
-  }
 })
