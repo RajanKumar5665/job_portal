@@ -69,7 +69,10 @@ export const registerUser = async (req, res) => {
 
         const exitingUser = await User.findOne({ $or: [{ email }, { phoneNumber }] });
         if (exitingUser) {
-            return res.status(400).json({ message: 'User with this email or phone number already exists' });
+            return res.status(400).json({ 
+                message: 'User with this email or phone number already exists',
+                success: false
+            });
         }
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({ name, 
@@ -86,7 +89,10 @@ export const registerUser = async (req, res) => {
         });
     } catch (error) {
         console.error('Error in registerUser:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ 
+            message: 'Server error',
+            success: false
+        });
     }
 };
 
