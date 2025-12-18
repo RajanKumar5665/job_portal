@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://job-portal-4haa.onrender.com/api/v1';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://job-portal-a540.onrender.com/api/v1';
 
   useEffect(() => {
     checkAuthStatus();
@@ -97,7 +97,7 @@ export const AuthProvider = ({ children }) => {
       });
 
       const response = await axios.post(
-        `${API_BASE_URL}/user/profile/update`,
+        `${API_BASE_URL}/user/me`,
         formData,
         {
           withCredentials: true,
@@ -108,7 +108,7 @@ export const AuthProvider = ({ children }) => {
       );
       
       setUser(response.data.user);
-      return { success: true };
+      toast. { success: true };
     } catch (error) {
       const message = error.response?.data?.message || 'Profile update failed';
       toast.error(message);
